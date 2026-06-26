@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from src.analysis import longest_song_streaks
 
 st.set_page_config(
     page_title="Spotify Analysis",
@@ -97,3 +98,15 @@ fig = px.bar(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
+
+st.subheader("Biggest Obsessions")
+
+obsessions = longest_song_streaks(df)
+
+st.dataframe(
+    obsessions,
+    use_container_width=True,
+    hide_index=True
+)
