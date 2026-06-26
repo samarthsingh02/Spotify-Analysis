@@ -79,3 +79,40 @@ def burnout_evergreen(df, min_total_plays=15):
     )
 
     return burnout, evergreen
+
+def create_sessions(df, gap_minutes=30):
+    df = df.sort_values("timestamp").copy()
+
+    gap = df["timestamp"].diff().dt.total_seconds().div(60)
+
+    df["new_session"] = gap.isna() | (gap > gap_minutes)
+
+    df["session_id"] = df["new_session"].cumsum()
+
+    return df
+
+def session_statistics(df):
+
+    sessions = (
+        df.groupby("session_id")
+        .agg(
+            Start=("timestamp", "min"),
+            End=("timestamp", "max"),
+            Songs=("song", "count"),
+            Unique_Songs=("song", "nunique"),
+            Artists=("artist", "nunique"),
+            Minutes_Played=("minutes_played", "sum")
+        )
+        .reset_index(drop=True)
+    )
+
+    sessions["Duration"] = (
+        sessions["End"] - sessions["Start"]
+    ).dt.total_seconds() / 60
+
+    sessions = sessions.sort_values(
+        "Songs",
+        ascending=False
+    )
+
+    return sessions

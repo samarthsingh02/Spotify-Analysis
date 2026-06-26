@@ -1,8 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from src.analysis import longest_song_streaks
-from src.analysis import burnout_evergreen
+from src.analysis import (
+    longest_song_streaks,
+    burnout_evergreen,
+    create_sessions,
+    session_statistics
+)
+
 
 st.set_page_config(
     page_title="Spotify Analysis",
@@ -98,6 +103,8 @@ elif filter_type == "Custom Range":
     ]
 
 df = filtered_df
+
+df = create_sessions(df)
 
 # ------------------ Top Stats ------------------
 
@@ -291,3 +298,35 @@ with right:
         use_container_width=True,
         height=600
     )
+
+# ------------------ Listening Sessions ------------------
+
+st.divider()
+
+st.subheader("Listening Sessions")
+
+sessions = session_statistics(df)
+
+c1, c2, c3 = st.columns(3)
+
+c1.metric(
+    "Total Sessions",
+    f"{len(sessions):,}"
+)
+
+c2.metric(
+    "Longest Session",
+    f"{sessions['Songs'].max()} songs"
+)
+
+c3.metric(
+    "Average Session",
+    f"{sessions['Songs'].mean():.1f} songs"
+)
+
+st.dataframe(
+    sessions.head(100),
+    hide_index=True,
+    use_container_width=True,
+    height=600
+)
