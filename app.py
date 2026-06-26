@@ -7,7 +7,8 @@ from src.analysis import (
     create_sessions,
     session_statistics,
     song_groups,
-    recurring_song_groups
+    recurring_song_groups,
+    nostalgia_score
 )
 
 
@@ -361,4 +362,19 @@ st.dataframe(
     hide_index=True,
     use_container_width=True,
     height=700
+)
+
+# ------------------ Nostalgia Score ------------------
+
+st.divider()
+
+st.subheader("Nostalgia Score")
+
+nostalgia = nostalgia_score(df)
+
+st.dataframe(
+    nostalgia,
+    hide_index=True,
+    use_container_width=True,
+    height=600
 )

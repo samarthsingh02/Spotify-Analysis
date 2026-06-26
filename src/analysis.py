@@ -193,3 +193,48 @@ def recurring_song_groups(df, min_group_size=4, top_n=20):
     )
 
     return result
+
+def nostalgia_score(df, top_n=100):
+
+    rows = []
+
+    for song, group in df.groupby("song"):
+
+        group = group.sort_values("timestamp")
+
+        if len(group) < 2:
+            continue
+
+        gaps = (
+            group["timestamp"]
+            .diff()
+            .dt.days
+            .dropna()
+        )
+
+        if gaps.empty:
+            continue
+
+        max_gap = gaps.max()
+
+        if pd.isna(max_gap):
+            continue
+
+        idx = gaps.idxmax()
+
+        previous_play = group.loc[idx - 1, "timestamp"]
+        comeback_play = group.loc[idx, "timestamp"]
+
+        rows.append({
+            "Song": song,
+            "Gap (Days)": int(max_gap),
+            "Last Heard": previous_play.strftime("%d %b %Y"),
+            "Rediscovered": comeback_play.strftime("%d %b %Y"),
+            "Total Plays": len(group)
+        })
+
+    return (
+        pd.DataFrame(rows)
+        .sort_values("Gap (Days)", ascending=False)
+        .head(top_n)
+    )
