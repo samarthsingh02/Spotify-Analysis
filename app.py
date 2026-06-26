@@ -6,7 +6,8 @@ from src.analysis import (
     burnout_evergreen,
     create_sessions,
     session_statistics,
-    song_groups
+    song_groups,
+    recurring_song_groups
 )
 
 
@@ -345,4 +346,19 @@ st.dataframe(
     hide_index=True,
     use_container_width=True,
     height=600
+)
+
+# ------------------ Recurring Song Groups ------------------
+
+st.divider()
+
+st.subheader("Recurring Song Groups")
+
+groups = recurring_song_groups(df)
+
+st.dataframe(
+    groups,
+    hide_index=True,
+    use_container_width=True,
+    height=700
 )

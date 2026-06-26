@@ -1,5 +1,6 @@
 import pandas as pd
 from itertools import combinations
+from collections import Counter
 
 
 def longest_song_streaks(df, top_n=20):
@@ -152,3 +153,43 @@ def song_groups(df, top_n=100):
     )
 
     return result.head(top_n)
+
+def recurring_song_groups(df, min_group_size=4, top_n=20):
+    sessions = (
+        df.groupby("session_id")["song"]
+        .apply(lambda x: sorted(set(x)))
+        .tolist()
+    )
+
+    counter = Counter()
+
+    n = len(sessions)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+
+            common = set(sessions[i]) & set(sessions[j])
+
+            if len(common) >= min_group_size:
+                counter[frozenset(common)] += 1
+
+    rows = []
+
+    for songs, count in counter.items():
+
+        rows.append({
+            "Songs": "\n".join(sorted(songs)),
+            "Group Size": len(songs),
+            "Repeated Sessions": count + 1
+        })
+
+    result = (
+        pd.DataFrame(rows)
+        .sort_values(
+            ["Repeated Sessions", "Group Size"],
+            ascending=False
+        )
+        .head(top_n)
+    )
+
+    return result
