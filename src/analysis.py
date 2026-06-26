@@ -1,4 +1,5 @@
 import pandas as pd
+from itertools import combinations
 
 
 def longest_song_streaks(df, top_n=20):
@@ -116,3 +117,38 @@ def session_statistics(df):
     )
 
     return sessions
+
+def song_groups(df, top_n=100):
+    pair_counts = {}
+
+    sessions = df.groupby("session_id")
+
+    for _, session in sessions:
+
+        songs = session["song"].drop_duplicates().tolist()
+
+        if len(songs) < 2:
+            continue
+
+        for pair in combinations(sorted(songs), 2):
+
+            pair_counts[pair] = pair_counts.get(pair, 0) + 1
+
+    rows = []
+
+    for pair, count in pair_counts.items():
+
+        rows.append({
+            "Song 1": pair[0],
+            "Song 2": pair[1],
+            "Sessions Together": count
+        })
+
+    result = pd.DataFrame(rows)
+
+    result = result.sort_values(
+        "Sessions Together",
+        ascending=False
+    )
+
+    return result.head(top_n)

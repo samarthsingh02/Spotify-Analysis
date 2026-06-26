@@ -5,7 +5,8 @@ from src.analysis import (
     longest_song_streaks,
     burnout_evergreen,
     create_sessions,
-    session_statistics
+    session_statistics,
+    song_groups
 )
 
 
@@ -326,6 +327,21 @@ c3.metric(
 
 st.dataframe(
     sessions.head(100),
+    hide_index=True,
+    use_container_width=True,
+    height=600
+)
+
+# ------------------ Songs Frequently Played Together ------------------
+
+st.divider()
+
+st.subheader("Songs Frequently Played Together")
+
+groups = song_groups(df)
+
+st.dataframe(
+    groups,
     hide_index=True,
     use_container_width=True,
     height=600
