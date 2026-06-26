@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from src.analysis import longest_song_streaks
+from src.analysis import burnout_evergreen
 
 st.set_page_config(
     page_title="Spotify Analysis",
@@ -110,3 +111,39 @@ st.dataframe(
     use_container_width=True,
     hide_index=True
 )
+
+st.divider()
+
+burnout, evergreen = burnout_evergreen(df)
+
+left, right = st.columns(2)
+
+with left:
+    st.subheader("Burnout Songs")
+    st.dataframe(
+        burnout[
+            [
+                "song",
+                "total_plays",
+                "peak_month",
+                "active_months",
+                "burnout_score"
+            ]
+        ],
+        hide_index=True,
+        use_container_width=True
+    )
+
+with right:
+    st.subheader("Evergreen Songs")
+    st.dataframe(
+        evergreen[
+            [
+                "song",
+                "total_plays",
+                "active_months"
+            ]
+        ],
+        hide_index=True,
+        use_container_width=True
+    )
