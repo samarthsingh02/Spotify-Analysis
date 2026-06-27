@@ -10,7 +10,8 @@ from src.analysis import (
     recurring_song_groups,
     nostalgia_score,
     artist_loyalty,
-    album_loyalty
+    album_loyalty,
+    binge_detection
 )
 
 
@@ -410,3 +411,33 @@ st.dataframe(
     use_container_width=True,
     height=600
 )
+
+# ------------------ binge detection ------------------
+
+st.divider()
+
+artist_binge, album_binge = binge_detection(df)
+
+left, right = st.columns(2)
+
+with left:
+
+    st.subheader("Artist Binges")
+
+    st.dataframe(
+        artist_binge,
+        hide_index=True,
+        use_container_width=True,
+        height=600
+    )
+
+with right:
+
+    st.subheader("Album Binges")
+
+    st.dataframe(
+        album_binge,
+        hide_index=True,
+        use_container_width=True,
+        height=600
+    )

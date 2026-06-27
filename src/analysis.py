@@ -296,3 +296,72 @@ def album_loyalty(df, top_n=100):
         "Loyalty Score",
         ascending=False
     ).head(top_n)
+
+def binge_detection(df, top_n=100):
+
+    df = df.sort_values("timestamp").reset_index(drop=True)
+
+    artist_rows = []
+    album_rows = []
+
+    # ---------- Artist Binges ----------
+
+    current_artist = df.loc[0, "artist"]
+    start = 0
+
+    for i in range(1, len(df)):
+
+        if df.loc[i, "artist"] != current_artist:
+
+            streak = i - start
+
+            if streak >= 5:
+
+                artist_rows.append({
+                    "Artist": current_artist,
+                    "Songs": streak,
+                    "Started": df.loc[start, "timestamp"],
+                    "Ended": df.loc[i-1, "timestamp"]
+                })
+
+            current_artist = df.loc[i, "artist"]
+            start = i
+
+    # ---------- Album Binges ----------
+
+    current_album = df.loc[0, "album"]
+    start = 0
+
+    for i in range(1, len(df)):
+
+        if df.loc[i, "album"] != current_album:
+
+            streak = i - start
+
+            if streak >= 3:
+
+                album_rows.append({
+                    "Album": current_album,
+                    "Artist": df.loc[start, "artist"],
+                    "Songs": streak,
+                    "Started": df.loc[start, "timestamp"],
+                    "Ended": df.loc[i-1, "timestamp"]
+                })
+
+            current_album = df.loc[i, "album"]
+            start = i
+
+    artists = pd.DataFrame(artist_rows)
+    albums = pd.DataFrame(album_rows)
+
+    if not artists.empty:
+        artists["Started"] = artists["Started"].dt.strftime("%d %b %Y")
+        artists["Ended"] = artists["Ended"].dt.strftime("%d %b %Y")
+        artists = artists.sort_values("Songs", ascending=False).head(top_n)
+
+    if not albums.empty:
+        albums["Started"] = albums["Started"].dt.strftime("%d %b %Y")
+        albums["Ended"] = albums["Ended"].dt.strftime("%d %b %Y")
+        albums = albums.sort_values("Songs", ascending=False).head(top_n)
+
+    return artists, albums
