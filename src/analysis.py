@@ -1,6 +1,7 @@
 import pandas as pd
 from itertools import combinations
 from collections import Counter
+import math
 
 
 def longest_song_streaks(df, top_n=20):
@@ -200,41 +201,37 @@ def nostalgia_score(df, top_n=100):
 
     for song, group in df.groupby("song"):
 
-        group = group.sort_values("timestamp")
+        group = group.sort_values("timestamp").reset_index(drop=True)
 
-        if len(group) < 2:
+        if len(group) < 3:
             continue
 
-        gaps = (
-            group["timestamp"]
-            .diff()
-            .dt.days
-            .dropna()
-        )
+        gaps = group["timestamp"].diff().dt.days
 
-        if gaps.empty:
+        gap_index = gaps.idxmax()
+
+        if pd.isna(gap_index):
             continue
 
-        max_gap = gaps.max()
+        gap_days = gaps.iloc[gap_index]
 
-        if pd.isna(max_gap):
-            continue
+        previous_play = group.iloc[gap_index - 1]["timestamp"]
+        comeback_play = group.iloc[gap_index]["timestamp"]
 
-        idx = gaps.idxmax()
-
-        previous_play = group.loc[idx - 1, "timestamp"]
-        comeback_play = group.loc[idx, "timestamp"]
+        score = gap_days * math.log(len(group) + 1)
 
         rows.append({
             "Song": song,
-            "Gap (Days)": int(max_gap),
+            "Nostalgia Score": round(score, 2),
+            "Gap (Days)": int(gap_days),
             "Last Heard": previous_play.strftime("%d %b %Y"),
             "Rediscovered": comeback_play.strftime("%d %b %Y"),
             "Total Plays": len(group)
         })
 
-    return (
-        pd.DataFrame(rows)
-        .sort_values("Gap (Days)", ascending=False)
-        .head(top_n)
-    )
+    result = pd.DataFrame(rows)
+
+    return result.sort_values(
+        "Nostalgia Score",
+        ascending=False
+    ).head(top_n)
