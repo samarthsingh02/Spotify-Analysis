@@ -235,3 +235,64 @@ def nostalgia_score(df, top_n=100):
         "Nostalgia Score",
         ascending=False
     ).head(top_n)
+
+def artist_loyalty(df, top_n=100):
+
+    artist = (
+        df.groupby("artist")
+        .agg(
+            Total_Plays=("song", "count"),
+            First_Listen=("timestamp", "min"),
+            Last_Listen=("timestamp", "max"),
+            Active_Months=("month_name", lambda x: x.astype(str).str.cat(
+                df.loc[x.index, "year"].astype(str), sep="-"
+            ).nunique())
+        )
+        .reset_index()
+    )
+
+    artist["Days Active"] = (
+        artist["Last_Listen"] - artist["First_Listen"]
+    ).dt.days
+
+    artist["Loyalty Score"] = (
+        artist["Total_Plays"] *
+        (artist["Days Active"] / 365 + 1)
+    ).round(2)
+
+    artist["First_Listen"] = artist["First_Listen"].dt.strftime("%d %b %Y")
+    artist["Last_Listen"] = artist["Last_Listen"].dt.strftime("%d %b %Y")
+
+    return artist.sort_values(
+        "Loyalty Score",
+        ascending=False
+    ).head(top_n)
+
+def album_loyalty(df, top_n=100):
+
+    albums = (
+        df.groupby(["album", "artist"])
+        .agg(
+            Total_Plays=("song", "count"),
+            First_Listen=("timestamp", "min"),
+            Last_Listen=("timestamp", "max")
+        )
+        .reset_index()
+    )
+
+    albums["Days Active"] = (
+        albums["Last_Listen"] - albums["First_Listen"]
+    ).dt.days
+
+    albums["Loyalty Score"] = (
+        albums["Total_Plays"] *
+        (albums["Days Active"] / 365 + 1)
+    ).round(2)
+
+    albums["First_Listen"] = albums["First_Listen"].dt.strftime("%d %b %Y")
+    albums["Last_Listen"] = albums["Last_Listen"].dt.strftime("%d %b %Y")
+
+    return albums.sort_values(
+        "Loyalty Score",
+        ascending=False
+    ).head(top_n)

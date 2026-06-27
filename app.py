@@ -8,7 +8,9 @@ from src.analysis import (
     session_statistics,
     song_groups,
     recurring_song_groups,
-    nostalgia_score
+    nostalgia_score,
+    artist_loyalty,
+    album_loyalty
 )
 
 
@@ -374,6 +376,36 @@ nostalgia = nostalgia_score(df)
 
 st.dataframe(
     nostalgia,
+    hide_index=True,
+    use_container_width=True,
+    height=600
+)
+
+# ------------------ artist loyalty ------------------
+
+st.divider()
+
+st.subheader("Artist Loyalty")
+
+artists = artist_loyalty(df)
+
+st.dataframe(
+    artists,
+    hide_index=True,
+    use_container_width=True,
+    height=600
+)
+
+# ------------------ album loyalty ------------------
+
+st.divider()
+
+st.subheader("Album Loyalty")
+
+albums = album_loyalty(df)
+
+st.dataframe(
+    albums,
     hide_index=True,
     use_container_width=True,
     height=600
